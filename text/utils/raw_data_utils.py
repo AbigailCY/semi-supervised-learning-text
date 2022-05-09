@@ -137,16 +137,65 @@ class IMDbProcessor(DataProcessor):
     """See base class."""
     return ["pos", "neg"]
 
+
+  def get_train_size(self):
+    return 25000
+
+  def get_dev_size(self):
+    return 25000
   def _create_examples(self, lines, set_type, skip_unsup=True):
     """Creates examples for the training and dev sets."""
     examples = []
     for (i, line) in enumerate(lines):
+      # print(i,line)
       if i == 0:
         continue
       if skip_unsup and line[1] == "unsup":
         continue
-      if line[1] == "unsup" and len(line[0]) < 500:
+      #if line[1] == "unsup" and len(line[0]) < 500:
         # tf.logging.info("skipping short samples:{:s}".format(line[0]))
+       # continue
+      guid = "%s-%s" % (set_type, line[2])
+      text_a = line[0]
+      label = line[1]
+      text_a = clean_web_text(text_a)
+      examples.append(
+          InputExample(guid=guid, text_a=text_a, text_b=None, label=label))
+    return examples
+
+class AG1000Processor(DataProcessor):
+  def __init__(self):
+    self.has_title = False
+
+  def get_train_examples(self, raw_data_dir):
+    """See base class."""
+    return self._create_examples(
+        self._read_tsv(os.path.join(raw_data_dir, "train.csv"),
+                       quotechar='"'), "train")
+
+  def get_dev_examples(self, raw_data_dir):
+    """See base class."""
+    return self._create_examples(
+        self._read_tsv(os.path.join(raw_data_dir, "test.csv"),
+                       quotechar='"'), "test")
+  def get_unsup_examples(self, raw_data_dir, unsup_set):
+    """See base class."""
+    if unsup_set == "unsup_in":
+      return self._create_examples(
+          self._read_tsv(
+              os.path.join(raw_data_dir, "train6.csv"),
+              quotechar='"'),
+          "unsup_in", skip_unsup=False)
+  def _create_examples(self, lines, set_type, skip_unsup=True, only_unsup=False):
+    """Creates examples for the training and dev sets."""
+    examples = []
+    for (i, line) in enumerate(lines):
+      print(i,line)
+      if i == 0:
+        continue
+      if skip_unsup and line[1] == "unsup":
+        continue
+      if only_unsup and line[1] != "unsup":
         continue
       guid = "%s-%s" % (set_type, line[2])
       text_a = line[0]
@@ -156,11 +205,83 @@ class IMDbProcessor(DataProcessor):
           InputExample(guid=guid, text_a=text_a, text_b=None, label=label))
     return examples
 
+  def get_labels(self):
+    """See base class."""
+    return [str(i) for i in range(0, 4)]
+
   def get_train_size(self):
-    return 25000
+    return 1000
 
   def get_dev_size(self):
-    return 25000
+    return 7600
+
+
+
+class tNEWSProcessor(DataProcessor):
+  def __init__(self):
+    self.has_title = False
+
+  def get_train_examples(self, raw_data_dir):
+    """See base class."""
+    return self._create_examples(
+        self._read_tsv(os.path.join(raw_data_dir, "train.csv"),
+                       quotechar='"'), "train")
+
+  def get_dev_examples(self, raw_data_dir):
+    """See base class."""
+    return self._create_examples(
+        self._read_tsv(os.path.join(raw_data_dir, "test.csv"),
+                       quotechar='"'), "test")
+  def get_unsup_examples(self, raw_data_dir, unsup_set):
+    """See base class."""
+    if unsup_set == "unsup_in":
+      return self._create_examples(
+          self._read_tsv(
+              os.path.join(raw_data_dir, "train.csv"),
+              quotechar='"'),
+          "unsup_in", skip_unsup=False)
+  def get_weak_examples(self, raw_data_dir, token_num):
+    """See base class."""
+    return self._create_examples(
+          self._read_tsv(
+              os.path.join(raw_data_dir, "20news_raw.csv"),
+              quotechar='"'),
+          "unsup_in", skip_unsup=False)
+  def get_strong_examples(self, raw_data_dir, token_num):
+    """See base class."""
+    return self._create_examples(
+          self._read_tsv(
+              os.path.join(raw_data_dir, "20news_bt.csv"),
+              quotechar='"'),
+          "unsup_in", skip_unsup=False)
+  def _create_examples(self, lines, set_type, skip_unsup=True, only_unsup=False):
+    """Creates examples for the training and dev sets."""
+    examples = []
+    for (i, line) in enumerate(lines):
+      print(i,line)
+      if i == 0:
+        continue
+      if skip_unsup and line[1] == "unsup":
+        continue
+      if only_unsup and line[1] != "unsup":
+        continue
+      guid = "%s-%s" % (set_type, line[2])
+      text_a = line[0]
+      label = line[1]
+      text_a = clean_web_text(text_a)
+      examples.append(
+          InputExample(guid=guid, text_a=text_a, text_b=None, label=label))
+    return examples
+
+  def get_labels(self):
+    """See base class."""
+    return [str(i) for i in range(0, 20)]
+
+  def get_train_size(self):
+    return 11314
+
+  def get_dev_size(self):
+    return 7532
 
 
 class TextClassProcessor(DataProcessor):
@@ -223,6 +344,7 @@ class TextClassProcessor(DataProcessor):
     return examples
 
 
+
 class YELP2Processor(TextClassProcessor):
 
   def __init__(self):
@@ -237,6 +359,7 @@ class YELP2Processor(TextClassProcessor):
 
   def get_dev_size(self):
     return 38000
+
 
 
 class YELP5Processor(TextClassProcessor):
@@ -350,6 +473,8 @@ def get_processor(task_name):
       "yelp-5": YELP5Processor,
       "amazon-2": AMAZON2Processor,
       "amazon-5": AMAZON5Processor,
+      "ag1000": AG1000Processor,
+      "20news": tNEWSProcessor,
   }
   processor = processors[task_name]()
   return processor

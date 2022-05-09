@@ -47,3 +47,6 @@ python preprocess.py \
   --aug_copy_num=0 \
   --vocab_file=$bert_vocab_file \
   $@
+
+# sub_set=unsup_fix
+# aug_ops = xx-0 (all) ; xx-num (number of augmented examples)

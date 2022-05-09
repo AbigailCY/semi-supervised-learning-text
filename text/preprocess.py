@@ -26,6 +26,7 @@ from absl import flags
 
 import numpy as np
 import tensorflow as tf
+import six
 
 # from augmentation import aug_policy
 from augmentation import sent_level_augment
@@ -266,8 +267,9 @@ def convert_examples_to_features(
       # st = " ".join([str(x) for x in tokens])
       st = ""
       for x in tokens:
-        if isinstance(x, unicode):
-          st += x.encode("ascii", "replace") + " "
+        if six.PY2 :
+          if isinstance(x, unicode):
+            st += x.encode("ascii", "replace") + " "
         else:
           st += str(x) + " "
       tf.logging.info("tokens: %s" % st)

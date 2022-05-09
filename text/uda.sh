@@ -1,0 +1,26 @@
+python3 main.py \
+  --use_tpu=True \
+  --do_train=True \
+  --do_eval=True \
+  --sup_train_data_dir=$STORAGE_BUCKET/data/proc_data/AG1000/train_40 \
+  --unsup_data_dir=$STORAGE_BUCKET/data/proc_data/AG1000/unsup10 \
+  --eval_data_dir=$STORAGE_BUCKET/data/proc_data/AG1000/dev \
+  --bert_config_file=$STORAGE_BUCKET/bert_pretrained/bert_base/bert_config.json \
+  --vocab_file=$STORAGE_BUCKET/bert_pretrained/bert_base/vocab.txt \
+  --init_checkpoint=$STORAGE_BUCKET/bert_pretrained/bert_base/bert_model.ckpt \
+  --task_name=ag1000 \
+  --model_dir=$STORAGE_BUCKET/ckpt/uda_t40_u100k_tf9 \
+  --max_seq_length=128 \
+  --tpu_name=$TPU_NAME \
+  --num_train_steps=40000 \
+  --learning_rate=2e-05 \
+  --num_warmup_steps=4000 \
+  --save_checkpoints_num=10 \
+  --unsup_ratio=3 \
+  --train_batch_size=32 \
+  --eval_batch_size=32 \
+  --tsa=linear_schedule \
+  --aug_ops=tf_idf-0.9 \
+  --aug_copy=1 \
+  --uda_coeff=1 \
+  $@

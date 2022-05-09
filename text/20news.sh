@@ -1,0 +1,26 @@
+python3 main_fix.py \
+  --use_tpu=True \
+  --do_train=True \
+  --do_eval=True \
+  --sup_train_data_dir=$STORAGE_BUCKET/data/proc_data/20news/train_25_1 \
+  --unsup_data_dir=$STORAGE_BUCKET/data/proc_data/20news/unsup_bt \
+  --eval_data_dir=$STORAGE_BUCKET/data/proc_data/20news/dev1 \
+  --bert_config_file=$STORAGE_BUCKET/bert_pretrained/bert_base/bert_config.json \
+  --vocab_file=$STORAGE_BUCKET/bert_pretrained/bert_base/vocab.txt \
+  --init_checkpoint=$STORAGE_BUCKET/bert_pretrained/bert_base/bert_model.ckpt \
+  --task_name=20news \
+  --model_dir=$STORAGE_BUCKET/ckpt/news_bt_fix_newtrain \
+  --max_seq_length=128 \
+  --tpu_name=$TPU_NAME \
+  --num_train_steps=20000 \
+  --learning_rate=2e-05 \
+  --num_warmup_steps=500 \
+  --save_checkpoints_num=15 \
+  --unsup_ratio=3 \
+  --train_batch_size=16 \
+  --eval_batch_size=32 \
+  --tsa=linear_schedule \
+  --aug_ops=tf-0.9 \
+  --aug_copy=1 \
+  --uda_coeff=1 \
+  $@
